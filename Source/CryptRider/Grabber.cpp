@@ -29,7 +29,8 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	UPhysicsHandleComponent* PhysicsHandle = GetPhysicsHandle();
-	if (PhysicsHandle==nullptr) return;
+	if (PhysicsHandle==nullptr)
+		return;
 
 	if(PhysicsHandle->GetGrabbedComponent())
 	{
@@ -41,7 +42,8 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 void UGrabber::Grab()
 {
 	UPhysicsHandleComponent* PhysicsHandle = GetPhysicsHandle();
-	if (PhysicsHandle==nullptr) return;
+	if (PhysicsHandle==nullptr)
+		return;
 	FHitResult HitResult;
 	bool HasHit = GetGrabbableInReach(HitResult);
 
@@ -74,10 +76,10 @@ bool UGrabber::GetGrabbableInReach(FHitResult& OutHitResult)
 
 	FCollisionShape CollisionSphere = FCollisionShape::MakeSphere(GrabRadius);
 	return GetWorld()->SweepSingleByChannel(
-		OutHitResult, 
-		Start, End, 
-		FQuat::Identity, 
-		ECC_GameTraceChannel2, 
+		OutHitResult,
+		Start, End,
+		FQuat::Identity,
+		ECC_GameTraceChannel2,
 		CollisionSphere
 	);
 }
@@ -85,7 +87,7 @@ bool UGrabber::GetGrabbableInReach(FHitResult& OutHitResult)
 void UGrabber::Release()
 {
 	UPhysicsHandleComponent* PhysicsHandle = GetPhysicsHandle();
-	if(PhysicsHandle==nullptr)
+	if(PhysicsHandle == nullptr)
 		return;
 	if(PhysicsHandle->GetGrabbedComponent() != nullptr)
 		PhysicsHandle->ReleaseComponent();

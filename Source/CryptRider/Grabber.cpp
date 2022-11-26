@@ -2,9 +2,9 @@
 
 
 #include "Grabber.h"
+
 #include "DrawDebugHelpers.h"
 #include "GameFramework/Actor.h"
-#include "PhysicsEngine/PhysicsHandleComponent.h"
 // Sets default values for this component's properties
 UGrabber::UGrabber()
 {
@@ -20,13 +20,6 @@ UGrabber::UGrabber()
 void UGrabber::BeginPlay()
 {
 	Super::BeginPlay();
-
-	UPhysicsHandleComponent* PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
-	PhysicsHandle = nullptr;
-	if(PhysicsHandle != nullptr){
-		UE_LOG(LogTemp, Display, TEXT("Name: %s"), *PhysicsHandle->GetName());}
-	else
-		UE_LOG(LogTemp, Warning, TEXT("Physics Handle is null!!!!!!!!!!!!!!!!!!!!!!!!!"));
 }
 
 
@@ -35,13 +28,22 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	UPhysicsHandleComponent* PhysicsHandle = GetPhysicsHandle();
+
+	if(PhysicsHandle->GetGrabbedComponent())
+	{
+		FVector TargetLocation = GetComponentLocation() + GetForwardVector() * HoldDistance;
+		PhysicsHandle->SetTargetLocationAndRotation(TargetLocation, GetComponentRotation());
+	}
 }
 
 void UGrabber::Grab()
 {
+	UPhysicsHandleComponent* PhysicsHandle = GetPhysicsHandle();
+	
 	FVector Start = GetComponentLocation();
 	FVector End = Start + GetForwardVector() * MaxGrabDistance;
- 	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 5);
+ 	// DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 5);
 	// DrawDebugSphere(GetWorld(), End, 10, 10, FColor::Blue, false, 5);
 	FCollisionShape CollisionSphere = FCollisionShape::MakeSphere(GrabRadius);
 	FHitResult HitResult;
@@ -52,14 +54,34 @@ void UGrabber::Grab()
 		ECC_GameTraceChannel2, 
 		CollisionSphere
 	);
-	
+
 	if (HasHit)
 	{
-		AActor* HitedActor = HitResult.GetActor();
-		UE_LOG(LogTemp, Display, TEXT("Hit object: %s"), *HitedActor->GetActorNameOrLabel());
-		// DrawDebugSphere(GetWorld(), HitResult.Location, 10, 10, FColor::Magenta, false, 5);
-		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10, 10, FColor::Emerald, false, 5);
+		UPrimitiveComponent* HitComponent = HitResult.GetComponent();
+		HitComponent->WakeAllRigidBodies();
+		PhysicsHandle->GrabComponentAtLocationWithRotation(
+			HitComponent,
+			NAME_None,
+			HitResult.ImpactPoint,
+			GetComponentRotation()
+		);
 	}
-	else
-		UE_LOG(LogTemp, Display, TEXT("No actor hit"));
+}
+
+UPhysicsHandleComponent* UGrabber::GetPhysicsHandle() const
+{
+	UPhysicsHandleComponent* PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
+	if(PhysicsHandle == nullptr)
+		UE_LOG(LogTemp, Error, TEXT("Physics Handle is null!!!!!!!!!!!!!!!!!!!!!!!!!"));
+
+	return PhysicsHandle;
+}
+
+void UGrabber::Release()
+{
+	UPhysicsHandleComponent* PhysicsHandle = GetPhysicsHandle();
+	if(PhysicsHandle==nullptr)
+		return;
+	if(PhysicsHandle->GetGrabbedComponent() != nullptr)
+		PhysicsHandle->ReleaseComponent();
 }

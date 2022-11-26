@@ -4,8 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Components/BoxComponent.h"
-#include "TriggerComponent.generated.h"
+#include "Mover.h"
 
+#include "TriggerComponent.generated.h"
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class CRYPTRIDER_API UTriggerComponent : public UBoxComponent
@@ -20,5 +21,15 @@ protected:
 	
 public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	
+
+	UFUNCTION(BlueprintCallable)
+	void SetMover(UMover* Mover);
+
+private:
+	UPROPERTY(EditAnywhere)
+	FName ActorTag;
+
+	UMover* Mover;
+
+	AActor* GetAcctableActor() const;
 };

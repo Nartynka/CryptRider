@@ -46,3 +46,8 @@ void UMover::Move(float DeltaTime)
 	 GetOwner()->SetActorLocation(NewLocation);
 
 }
+
+void UMover::SetShouldMove(bool NewShouldMove)
+{
+	ShouldMove = NewShouldMove;
+}

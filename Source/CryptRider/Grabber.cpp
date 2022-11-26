@@ -29,6 +29,7 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	UPhysicsHandleComponent* PhysicsHandle = GetPhysicsHandle();
+	if (PhysicsHandle==nullptr) return;
 
 	if(PhysicsHandle->GetGrabbedComponent())
 	{
@@ -40,20 +41,9 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 void UGrabber::Grab()
 {
 	UPhysicsHandleComponent* PhysicsHandle = GetPhysicsHandle();
-	
-	FVector Start = GetComponentLocation();
-	FVector End = Start + GetForwardVector() * MaxGrabDistance;
- 	// DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 5);
-	// DrawDebugSphere(GetWorld(), End, 10, 10, FColor::Blue, false, 5);
-	FCollisionShape CollisionSphere = FCollisionShape::MakeSphere(GrabRadius);
+	if (PhysicsHandle==nullptr) return;
 	FHitResult HitResult;
-	bool HasHit = GetWorld()->SweepSingleByChannel(
-		HitResult, 
-		Start, End, 
-		FQuat::Identity, 
-		ECC_GameTraceChannel2, 
-		CollisionSphere
-	);
+	bool HasHit = GetGrabbableInReach(HitResult);
 
 	if (HasHit)
 	{
@@ -75,6 +65,21 @@ UPhysicsHandleComponent* UGrabber::GetPhysicsHandle() const
 		UE_LOG(LogTemp, Error, TEXT("Physics Handle is null!!!!!!!!!!!!!!!!!!!!!!!!!"));
 
 	return PhysicsHandle;
+}
+
+bool UGrabber::GetGrabbableInReach(FHitResult& OutHitResult)
+{
+	FVector Start = GetComponentLocation();
+	FVector End = Start + GetForwardVector() * MaxGrabDistance;
+
+	FCollisionShape CollisionSphere = FCollisionShape::MakeSphere(GrabRadius);
+	return GetWorld()->SweepSingleByChannel(
+		OutHitResult, 
+		Start, End, 
+		FQuat::Identity, 
+		ECC_GameTraceChannel2, 
+		CollisionSphere
+	);
 }
 
 void UGrabber::Release()

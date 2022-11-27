@@ -1,4 +1,4 @@
 # CryptRider
 Dungeon in Unreal Engine
 
-https://user-images.githubusercontent.com/57597187/203617875-e3266a37-dcc5-4e50-816f-3e53347e2c41.mp4
+https://user-images.githubusercontent.com/57597187/204149024-7f93439a-cdd2-4447-aa20-5338ae7a832e.mp4

@@ -37,5 +37,4 @@ private:
 
 	FVector OriginalLocation;
 
-	void Move(float DeltaTime);
 };
